@@ -7,14 +7,10 @@ using System.Threading.Tasks;
 
 namespace Practicum.Core.Entities
 {
-    public class Product : BaseEntity
+    public class Category : BaseEntity
     {
-        public string ProductName { get; set; }
+        public string CategoryName { get; set; }
         [ForeignKey("Company")]
         public int CompanyId { get; set; }
-        [ForeignKey("Category")]
-        public int CategoryId { get; set; }
-        public int Stock { get; set; }
-        public decimal Price { get; set; }
     }
 }

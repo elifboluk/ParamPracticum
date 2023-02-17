@@ -13,7 +13,10 @@ namespace Practicum.Service.Mapping
     {
         public MapProfile()
         {            
-            CreateMap<Product, ProductDto>().ReverseMap();            
+            CreateMap<Product, ProductDto>().ReverseMap();
+            CreateMap<Company, CompanyDto>().ReverseMap();
+            CreateMap<Category, CategoryDto>().ReverseMap();
+            CreateMap<Company, CompanyWithProductsDto>();
         }
     }
 }
