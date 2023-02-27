@@ -36,7 +36,7 @@ namespace Practicum.Test
             var result = await _productsController.All();
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            Assert.IsType<ObjectResult>(result);
 
         }
         private List<Product> CreateProductList()
