@@ -12,12 +12,12 @@ namespace Practicum.API.Controllers
         public IActionResult CreateActionResult<T>(CustomResponseDto<T> response)
         {
             if (response.StatusCode == 204)
-                return new ObjectResult(null)
+                return new OkObjectResult(null)
                 {
                     StatusCode = response.StatusCode
                 };
 
-            return new ObjectResult(response)
+            return new OkObjectResult(response)
             {
                 StatusCode = response.StatusCode
             };
