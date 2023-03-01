@@ -11,21 +11,20 @@ using System.Net;
 namespace Practicum.Test
 {
     public class ProductsApiControllerTest
-    {        
+    {
         private readonly Mock<IProductService> _productServiceMock;
         private readonly Mock<IMapper> _mapperMock;
         private readonly ProductsController _productsController;
 
-        // You don't have to write in ctor.
         public ProductsApiControllerTest()
-        {            
+        {
             _productServiceMock = new Mock<IProductService>();
             _mapperMock = new Mock<IMapper>();
             _productsController = new ProductsController(_mapperMock.Object, _productServiceMock.Object);
         }
 
-        [Fact]
-        public async void All_ShouldReturnCreateActionResultSucces_WhenExistProduct()
+        [Fact] // OK!
+        public async void All_ReturnsOkResult_WhenProductExists()
         {
             // Arrange
             var products = CreateProductList(); // Product List
@@ -40,57 +39,90 @@ namespace Practicum.Test
             Assert.IsType<OkObjectResult>(result);
         }
 
-        [Fact]
-        public async void GetById_ShouldReturnCreateActionResultSucces_WhenProductExist()
+        [Fact] // OK!
+        public async void GetById_ReturnsOkResult_WhenProductExists()
         {
             var product = CreateProduct();
             var dtoExpected = MapModelToProductResultDto(product);
 
-            _productServiceMock.Setup(x => x.GetByIdAsync(2)).ReturnsAsync(product);
-            _mapperMock.Setup(y => y.Map<ProductDto>(It.IsAny<Product>())).Returns(dtoExpected);
-            var result = await _productsController.GetById(2);
+            _productServiceMock.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(product);
+            _mapperMock.Setup(y => y.Map<ProductDto>(product)).Returns(dtoExpected);
+            var result = await _productsController.GetById(1);
 
             Assert.IsType<OkObjectResult>(result);
         }
 
-        [Fact]
-        public async void GetById_ShouldReturnNotFound_WhenProductNotExist()
+        [Fact] // OK!
+        public async void GetById_ReturnsNotFoundResult_WhenProductDoesNotExist()
         {
-            _productServiceMock.Setup(x => x.GetByIdAsync(20)).ReturnsAsync((Product)null);
+
+            // Arrange
+            _productServiceMock.Setup(x => x.GetByIdAsync(20)).ReturnsAsync((Product)null!);
+
+            // Act
             var result = await _productsController.GetById(20);
 
+            // Assert
             Assert.IsType<NotFoundResult>(result);
         }
 
-        [Fact]
-        public async void Save_ShouldBeReturnBadRequest_WhenModelStateInvalid()
+        [Fact] // OK!
+        public async void Save_ReturnsOkResult_WhenModelStateValid()
         {
-            var productDto = new ProductDto();
-            _productsController.ModelState.AddModelError("ProductName", "The field name is required!");
+            var product = CreateProduct();
+            var dtoExpected = MapModelToProductResultDto(product);
 
-            var result = await _productsController.Save(productDto);
+            _productServiceMock.Setup(x => x.AddAsync(It.IsAny<Product>())).ReturnsAsync(product);
 
-            Assert.IsType<BadRequestResult>(result);
+            var result = await _productsController.Save(dtoExpected);
+
+            Assert.IsType<OkObjectResult>(result);
         }
 
-        [Fact]
-        public void Save_StringListHelloWorld_ArgumentOutOfRangeException()
+        [Fact] // OK!
+        public async void Update_ReturnsOkResult_WithMatchingIdAndProductDto()
         {
             // Arrange
-            var stringList = new List<string>();
+            var product = CreateProduct();
+            product.ProductName = "Test_Product_Name";
+            var dtoExpected = MapModelToProductResultDto(product);
 
             // Act
-            Action actual = () =>
-            {
-                stringList.Add("Hello");
-                stringList[5] = "Hello World";
-            };
+            _productServiceMock.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(product);
+            _mapperMock.Setup(y => y.Map<Product>(dtoExpected)).Returns(product);
+            var result = await _productsController.Update(dtoExpected);
 
             // Assert
-            Assert.Throws<ArgumentOutOfRangeException>(actual);
+            Assert.IsType<OkObjectResult>(result);
         }
 
-        private List<Product> CreateProductList()
+        [Fact] // OK!
+        public async void Update_ReturnsNotFound_WhenProductNotExists()
+        {
+            _productServiceMock.Setup(x => x.UpdateAsync(It.IsAny<Product>())).Throws(new Exception("Product is not found"));
+
+            var result = await _productsController.GetById(20);
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact] // OK!
+        public async void Remove_ReturnsOkResult_WhenProductRemoved()
+        {
+            // Arrange
+            var product = CreateProduct();
+            var dtoExpected = MapModelToProductResultDto(product);
+
+            // Act
+            _productServiceMock.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(product);
+            _mapperMock.Setup(y => y.Map<Product>(dtoExpected)).Returns(product);
+            var result = await _productsController.Remove(1);
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+
+        public IEnumerable<Product> CreateProductList()
         {
             return new List<Product>
             {
@@ -114,10 +146,10 @@ namespace Practicum.Test
                 }
             };
         }
-        private List<ProductDto> MapModelToProductResultListDto(List<Product> products)
+        public IEnumerable<ProductDto> MapModelToProductResultListDto(List<Product> products)
         {
             var listProduct = new List<ProductDto>();
-            foreach(var item in products)
+            foreach (var item in products)
             {
                 var product = new ProductDto
                 {
@@ -132,27 +164,27 @@ namespace Practicum.Test
             }
             return listProduct;
         }
-        private Product CreateProduct()
+        public Product CreateProduct()
         {
             return new Product
             {
-                Id = 5,
+                Id = 1,
                 CompanyId = 1,
                 CategoryId = 1,
                 ProductName = "Product Tester 2",
                 Price = 20,
-                Stock = 20,                
+                Stock = 20,
             };
         }
-        private ProductDto MapModelToProductResultDto(Product product)
+        public ProductDto MapModelToProductResultDto(Product product)
         {
             var productDto = new ProductDto
             {
                 Id = product.Id,
-                CategoryId= product.CategoryId,
-                CompanyId= product.CompanyId,
-                ProductName= product.ProductName,
-                Stock= product.Stock,
+                CategoryId = product.CategoryId,
+                CompanyId = product.CompanyId,
+                ProductName = product.ProductName,
+                Stock = product.Stock,
                 Price = product.Price
             };
             return productDto;
