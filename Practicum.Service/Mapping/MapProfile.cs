@@ -16,7 +16,7 @@ namespace Practicum.Service.Mapping
             CreateMap<Product, ProductDto>().ReverseMap();
             CreateMap<Company, CompanyDto>().ReverseMap();
             CreateMap<Category, CategoryDto>().ReverseMap();
-            CreateMap<Company, CompanyWithProductsDto>();
+            CreateMap<Company, CompanyWithProductsDto>().ReverseMap();
         }
     }
 }

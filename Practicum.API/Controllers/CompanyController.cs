@@ -8,10 +8,10 @@ namespace Practicum.API.Controllers
 {
     public class CompanyController : CustomBaseController
     {
-        private readonly ICompanyService _service;
         private readonly IMapper _mapper;
+        private readonly ICompanyService _service;
 
-        public CompanyController(ICompanyService service, IMapper mapper)
+        public CompanyController(IMapper mapper, ICompanyService service)
         {
             _service = service;
             _mapper = mapper;
@@ -20,7 +20,7 @@ namespace Practicum.API.Controllers
         [HttpGet("[action]/{companyId}")]
         public async Task<IActionResult> GetSingleCompanyByIdWithProducts(int companyId)
         {
-            return CreateActionResult(await _service.GetSingleCompanyByIdWithProductsAsync(companyId));
+            return Ok(await _service.GetSingleCompanyByIdWithProductsAsync(companyId));
         }
 
         [HttpGet]
@@ -28,15 +28,17 @@ namespace Practicum.API.Controllers
         {
             var companies = await _service.GetAllAsync();
             var companiesDtos = _mapper.Map<List<CompanyDto>>(companies.ToList());
-            return CreateActionResult(CustomResponseDto<List<CompanyDto>>.Success(200, companiesDtos));
+            return Ok(CustomResponseDto<List<CompanyDto>>.Success(200, companiesDtos));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var companies = await _service.GetByIdAsync(id);
+            if (companies == null)
+                return NotFound();
             var companiesDtos = _mapper.Map<CompanyDto>(companies);
-            return CreateActionResult(CustomResponseDto<CompanyDto>.Success(200, companiesDtos));
+            return Ok(CustomResponseDto<CompanyDto>.Success(200, companiesDtos));
         }
 
         [HttpPost]
@@ -44,14 +46,14 @@ namespace Practicum.API.Controllers
         {
             var company = await _service.AddAsync(_mapper.Map<Company>(companyDto));
             var companyDtos = _mapper.Map<CompanyDto>(company);
-            return CreateActionResult(CustomResponseDto<CompanyDto>.Success(201, companyDtos));
+            return Ok(CustomResponseDto<CompanyDto>.Success(201, companyDtos));
         }
 
         [HttpPut]
         public async Task<IActionResult> Update(CompanyDto companyDto)
         {
             await _service.UpdateAsync(_mapper.Map<Company>(companyDto));
-            return CreateActionResult(CustomResponseDto<NoContentDto>.Success(204));
+            return Ok(CustomResponseDto<NoContentDto>.Success(204));
         }
 
         [HttpDelete("{id}")]
@@ -59,7 +61,7 @@ namespace Practicum.API.Controllers
         {
             var company = await _service.GetByIdAsync(id);
             await _service.RemoveAsync(company);
-            return CreateActionResult(CustomResponseDto<NoContentDto>.Success(204));
+            return Ok(CustomResponseDto<NoContentDto>.Success(204));
         }
     }
 }

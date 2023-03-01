@@ -5,8 +5,6 @@ using Practicum.API.Controllers;
 using Practicum.Core.DTOs;
 using Practicum.Core.Entities;
 using Practicum.Core.Services;
-using System.ComponentModel.Design;
-using System.Net;
 
 namespace Practicum.Test
 {

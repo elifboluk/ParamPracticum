@@ -23,15 +23,17 @@ namespace Practicum.API.Controllers
         {
             var categories = await _service.GetAllAsync();
             var categoriesDtos = _mapper.Map<List<CategoryDto>>(categories.ToList());
-            return CreateActionResult(CustomResponseDto<List<CategoryDto>>.Success(200, categoriesDtos));
+            return Ok(CustomResponseDto<List<CategoryDto>>.Success(200, categoriesDtos));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var categories = await _service.GetByIdAsync(id);
+            if (categories == null)
+                return NotFound();
             var categoriesDtos = _mapper.Map<CategoryDto>(categories);
-            return CreateActionResult(CustomResponseDto<CategoryDto>.Success(200, categoriesDtos));
+            return Ok(CustomResponseDto<CategoryDto>.Success(200, categoriesDtos));
         }
 
         [HttpPost]
@@ -39,14 +41,14 @@ namespace Practicum.API.Controllers
         {
             var category = await _service.AddAsync(_mapper.Map<Category>(categoryDto));
             var categoryDtos = _mapper.Map<CategoryDto>(category);
-            return CreateActionResult(CustomResponseDto<CategoryDto>.Success(201, categoryDtos));
+            return Ok(CustomResponseDto<CategoryDto>.Success(201, categoryDtos));
         }
 
         [HttpPut]
         public async Task<IActionResult> Update(CategoryDto categoryDto)
         {
             await _service.UpdateAsync(_mapper.Map<Category>(categoryDto));
-            return CreateActionResult(CustomResponseDto<NoContentDto>.Success(204));
+            return Ok(CustomResponseDto<NoContentDto>.Success(204));
         }
 
         [HttpDelete("{id}")]
@@ -54,7 +56,7 @@ namespace Practicum.API.Controllers
         {
             var category = await _service.GetByIdAsync(id);
             await _service.RemoveAsync(category);
-            return CreateActionResult(CustomResponseDto<NoContentDto>.Success(204));
+            return Ok(CustomResponseDto<NoContentDto>.Success(204));
         }
     }
 }
